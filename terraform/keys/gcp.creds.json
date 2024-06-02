@@ -1,13 +1,1 @@
-{
-  "type": "service_account",
-  "project_id": "nyc-accidents-423921",
-  "private_key_id": "668b49f632027107e8898d123652ee4e52f8f5f6",
-  "private_key": "-----BEGIN PRIVATE KEY-----\nMIIEvQIBADANBgkqhkiG9w0BAQEFAASCBKcwggSjAgEAAoIBAQDNJqIeZQplkn1e\nuP/gBrNckdSVFUziNqvi1OXkIhXcnzySusGdVKACC07ucSC9OQO0pXPQqmyGbiSs\ncZYgUMkVTxBkCkdzc+Ez+Sw5mZuCX7zK0eyIBTwrXUpTLaGLtkHKEgLF5O++ErPd\ntxhsfGeigsnsO++VEthuBxFkvFoIcaaHFfei1XulsUzUt8YJ2mld5o12Ciga8Ezf\nwfNnOYOfEMvTyiCCkU6TKHsgiVjquWa4GLOHbEec9lMdPQ9uybsyY3881oanR5WM\nfmB80zhU0+xLDWkGH160KQaRoL+uY3D9/wwozoaGPqp0IqiDL0JO8cqAwgEUqLXe\nF7bl9XCVAgMBAAECggEABeldlZOiy49/llmtYea/h2TaY9tjxkb+CADLiRnkWGGs\nTKweBSsZm0V5JkzTPTCl5zA3WKV4kB0faGqzgUXirX8EQWW8blrB/A3rlNNU1Fpu\n5cdL0hWYiMVc7W2ssIp1dd2z/8DbmbYPQc3TYdjp4Zh0Oh72Be0vmGgSu7zjuUeD\n2yNYVLEnerzvmduBPbuP3KDnvJBlAYw3wo2JpFZmSnTVN/ReKlAjBHIsEFm8TNzd\nXLlqQMHhH0q7NmScKJKx/NbQlh+PZ5Aj+VSOJkHvQIsdVbBX45VxrxuxoflGKtns\nQAuUlEjDo6LhlDEUbfmyuB63XCrCV3LDLRYOpH4bEQKBgQD6TuhxfUfjIIcg0jcB\nFsyLGivQFvIkgWU05FCHIaL98/403Wx9w0UCPZm9+K6I9x6HLMtDkoH4/RuG0CDD\nQnbA+vf4DoEv5xXa9uj7iMWdWAUvqSQDxhHVp4Jbu50q7+rZJ3Upg6Zzv4dhcFou\nmar+LIRmU5lUD2MDXJrAhui1/QKBgQDR0NscABLTTINj9Ia4cip1P+XMJsCAl2lv\nCoRxPJFag0UPox8yAb96JDBjwKevz6jw0M5Jo21oShEWkdy21Pot2/IUK0NxCDyi\n3aDaCE69SVkFlsWZCwE7Kia8gOWJNGTJujroBJwwRgBjpFRJgr81C2QtFpKLgoNb\n57wIh3rceQKBgBRPruD2r4yoqQ5qwHfgJ7zp5MA//Gol7dZ66GXuvtEoqWoUxab2\n33StFvqpYVBP7TQ+2EelbdKMh11LKj1t+UDznIeOdcEzWTypaIJwuMhpyhHyAbAk\ntHHH4/YZpUlEqqPwZbt2qV0fH5cyjL7XTV7OsfeztO9zSC+PpicVS3DpAoGBAIqo\n21Ta25YWt7JkFHBqypJoIwbTCV8yMTR4H+Tx4SGPJSHbbK9Qpmki53PVCzzOINjd\nNadGwPQuFrLyvIl7oMaT15zqpoxZpDECBN5ypQ7FHXbrGDU3J54hEi57hLYzEPSc\nBXf2K/5fFLzFCgr2xERa/d4qT7ixDPy83fBJELIJAoGARfJIqaMmCJsxRjBnHyzD\n6YFXiwxlqrpOeq4rUtw/Znoxx9b5B67eIUslfahd8l7XAIEwwxMYKHgd74AniQx3\npI6xOwHDSY32zmfpsdIFQRX1jVr7WPVgh/DCeY+DiYvdSZFvfg94rkeqX7/2Aumc\nvnL6nz4VUB99qtge57Yg+Wk=\n-----END PRIVATE KEY-----\n",
-  "client_email": "pipeline@nyc-accidents-423921.iam.gserviceaccount.com",
-  "client_id": "104423063383825070642",
-  "auth_uri": "https://accounts.google.com/o/oauth2/auth",
-  "token_uri": "https://oauth2.googleapis.com/token",
-  "auth_provider_x509_cert_url": "https://www.googleapis.com/oauth2/v1/certs",
-  "client_x509_cert_url": "https://www.googleapis.com/robot/v1/metadata/x509/pipeline%40nyc-accidents-423921.iam.gserviceaccount.com",
-  "universe_domain": "googleapis.com"
-}
+
