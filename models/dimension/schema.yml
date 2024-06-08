@@ -1,0 +1,481 @@
+
+version: 2
+
+models:
+  - name: dim_vehicles
+    description: "This is the vehicle dimension, contains data about the vehicles involved in the crash"
+    columns:
+      - name: unique_id
+        data_type: string
+        description: "Unique Key for the table"
+        tests:
+          - not_null
+
+      - name: collision_id
+        data_type: string
+        description: "Foreign key linking to the crashes fact"
+        tests:
+          - relationships:
+              to: ref('fct_crashes')
+              field: collision_id
+              severity: warn
+          - not_null
+          
+
+      - name: vehicle_id
+        data_type: string
+        description: "Key for Vehicle "
+        tests:
+          - not_null
+
+      - name: state_registration
+        data_type: string
+        description: "A field showing which state the vehicle was registered in"
+        tests:
+          - not_null
+
+      - name: vehicle_type
+        data_type: string
+        description: "Vehicle Type"
+        tests:
+          - not_null
+
+      - name: vehicle_make
+        data_type: string
+        description: "The make of the vehicle"
+        tests:
+          - not_null
+
+      - name: vehicle_model
+        data_type: string
+        description: "The model of the vehicle"
+        tests:
+          - not_null
+          
+      - name: vehicle_year
+        data_type: int64
+        description: "The year the vehicle was manifactured"
+        tests:
+          - not_null
+              
+      - name: travel_direction
+        data_type: string
+        description: "The direction the vehicle was going in (North, South, East, West, etc.)"
+        tests:
+          - not_null
+          - dbt_expectations.expect_column_distinct_count_to_equal: 
+              value: 9
+              severity: warn
+
+          - dbt_expectations.expect_column_values_to_be_in_set:
+              value_set: ['North','South','East','West','North-East','North-West','South-East','South-West', 'NA']
+              severity: warn
+            
+      - name: vehicle_occupants
+        data_type: int64
+        description: "Number of people inside the vehicle"
+        tests:
+          - not_null
+
+
+      - name: driver_sex
+        data_type: string
+        description: "Sex of the driver"
+        tests:
+          - not_null
+
+      - name: driver_license_status
+        data_type: string
+        description: "The status of the driver license, can eithe be licensed, unlicensed or having a permit"
+        tests:
+          - not_null
+
+      - name: driver_license_jurisdiction
+        data_type: string
+        description: "The jusrisdiction state of the driver license"
+        tests:
+          - not_null
+
+      - name: pre_crash
+        data_type: string
+        description: "The state of the vehicle pre cras"
+
+      - name: point_of_impact
+        data_type: string
+        description: "The vehicle's point of impact in the crash"
+        tests:
+          - not_null
+
+      - name: vehicle_damage
+        data_type: string
+        description: "Desrciption of the damage done to the vehicle"
+        tests:
+          - not_null
+
+      - name: vehicle_damage_1
+        data_type: string
+        description: "Desrciption of the damage done to the vehicle"
+        tests:
+          - not_null
+
+      - name: vehicle_damage_2
+        data_type: string
+        description: "Desrciption of the damage done to the vehicle"
+        tests:
+          - not_null
+          
+      - name: vehicle_damage_3
+        data_type: string
+        description: "Desrciption of the damage done to the vehicle"
+        tests:
+          - not_null
+          
+      - name: is_public_property_damage
+        data_type: string
+        description: "A field determining if the vehicle cause public property damage"
+        tests:
+          - not_null
+          
+      - name: public_property_damage_description
+        data_type: string
+        description: "Description of public property damage"
+        tests:
+          - not_null
+          
+      - name: contributing_factor_1
+        data_type: string
+        description: "Contributing factor to the crash"
+        tests:
+          - not_null
+
+      - name: contributing_factor_2
+        data_type: string
+        description: "Contributing factor to the crash"
+        tests:
+          - not_null
+
+  - name: dim_borough
+    description: "This a dimension for new york boroughs"
+    columns:
+      - name: borough_id
+        data_type: string
+        description: "Unique key for borough"
+        tests:
+          - not_null
+        
+      - name: borough
+        data_type: string
+        description: "The name of the borough, it can be Staten Island, Bronx, Brooklyn, , Manhattan or Queens"
+        tests:
+          - not_null
+          - dbt_expectations.expect_column_distinct_count_to_equal: 
+              value: 6
+              severity: warn
+
+          - dbt_expectations.expect_column_values_to_be_in_set:
+              value_set: ['BRONX','QUEENS','STATEN ISLAND','BROOKLYN','MANHATTAN','NA']
+              severity: warn
+
+  - name: dim_date
+    description: "Date dimension"
+    columns:
+      - name: date_id
+        data_type: string
+        description: ""
+
+      - name: date_day
+        data_type: date
+        description: ""
+
+      - name: prior_date_day
+        data_type: date
+        description: ""
+
+      - name: next_date_day
+        data_type: date
+        description: ""
+
+      - name: prior_year_date_day
+        data_type: date
+        description: ""
+
+      - name: prior_year_over_year_date_day
+        data_type: date
+        description: ""
+
+      - name: day_of_week
+        data_type: int64
+        description: ""
+
+      - name: day_of_week_iso
+        data_type: int64
+        description: ""
+
+      - name: day_of_week_name
+        data_type: string
+        description: ""
+
+      - name: day_of_week_name_short
+        data_type: string
+        description: ""
+
+      - name: day_of_month
+        data_type: int64
+        description: ""
+
+      - name: day_of_year
+        data_type: int64
+        description: ""
+
+      - name: week_start_date
+        data_type: date
+        description: ""
+
+      - name: week_end_date
+        data_type: date
+        description: ""
+
+      - name: prior_year_week_start_date
+        data_type: date
+        description: ""
+
+      - name: prior_year_week_end_date
+        data_type: date
+        description: ""
+
+      - name: week_of_year
+        data_type: int64
+        description: ""
+
+      - name: iso_week_start_date
+        data_type: date
+        description: ""
+
+      - name: iso_week_end_date
+        data_type: date
+        description: ""
+
+      - name: prior_year_iso_week_start_date
+        data_type: date
+        description: ""
+
+      - name: prior_year_iso_week_end_date
+        data_type: date
+        description: ""
+
+      - name: iso_week_of_year
+        data_type: int64
+        description: ""
+
+      - name: prior_year_week_of_year
+        data_type: int64
+        description: ""
+
+      - name: prior_year_iso_week_of_year
+        data_type: int64
+        description: ""
+
+      - name: month_of_year
+        data_type: int64
+        description: ""
+
+      - name: month_name
+        data_type: string
+        description: ""
+
+      - name: month_name_short
+        data_type: string
+        description: ""
+
+      - name: month_start_date
+        data_type: date
+        description: ""
+
+      - name: month_end_date
+        data_type: date
+        description: ""
+
+      - name: prior_year_month_start_date
+        data_type: date
+        description: ""
+
+      - name: prior_year_month_end_date
+        data_type: date
+        description: ""
+
+      - name: quarter_of_year
+        data_type: int64
+        description: ""
+
+      - name: quarter_start_date
+        data_type: date
+        description: ""
+
+      - name: quarter_end_date
+        data_type: date
+        description: ""
+
+      - name: year_number
+        data_type: int64
+        description: ""
+
+      - name: year_start_date
+        data_type: date
+        description: ""
+
+      - name: year_end_date
+        data_type: date
+        description: ""
+
+  - name: dim_location
+    description: "Location dimension for the streets where the crash took place"
+    columns:
+      - name: location_id
+        data_type: string
+        description: "Unique key for location"
+
+      - name: on_street_name
+        data_type: string
+        description: "Street name"
+        tests:
+          - not_null
+          
+      - name: cross_street_name
+        data_type: string
+        description: "Street name"
+        tests:
+          - not_null
+        
+      - name: off_street_name
+        data_type: string
+        description: "Street name"
+        tests:
+          - not_null
+              
+  - name: dim_people
+    description: ""
+    columns:
+      - name: unique_id
+        data_type: string
+        description: "Unique Key for the table"
+        tests:
+          - not_null
+      
+      - name: collision_id
+        data_type: string
+        description: "Foreign key linking to the crashes fact"
+        tests:
+          - not_null
+          
+      - name: person_id
+        data_type: string
+        description: "A key for person"
+
+      - name: vehicle_id
+        data_type: string
+        description: "Foreign key linking to the vehicle dimension"
+
+      - name: person_type
+        data_type: string
+        description: "A classification of the person involved in the crash. It can be an occupant, Bicyclist, Pedestrian or Other"
+        tests:
+          - not_null
+          - dbt_expectations.expect_column_distinct_count_to_equal: 
+              value: 4
+              severity: warn
+
+          - dbt_expectations.expect_column_values_to_be_in_set:
+              value_set: ['Occupant','Bicyclist','Pedestrian','Other Motorized']
+              severity: warn
+
+      - name: person_injury
+        data_type: string
+        description: "Classification of the person status after the crash, it can be killed, injured or unspecified"
+        tests:
+          - not_null
+          - dbt_expectations.expect_column_distinct_count_to_equal: 
+              value: 3
+              severity: warn
+
+          - dbt_expectations.expect_column_values_to_be_in_set:
+              value_set: ['Killed','Injured','Unspecified']
+              severity: warn
+
+      - name: person_age
+        data_type: int64
+        description: "Age of the person involved in the crash"
+        tests:
+          - not_null
+          
+      - name: person_sex
+        data_type: string
+        description: "Sex of the person involved in the crash cash it can be M, F or U"
+        tests:
+          - not_null
+
+
+      - name: ejection
+        data_type: string
+        description: "The Status of the person inside the car, they can be ejected, partially ejected, trapped, not ejected, does not apply or unknown"
+        tests:
+          - not_null
+
+      - name: emotional_status
+        data_type: string
+        description: "The status of the person after the crash, they can be conscious, shock, unconscious, apparent death, semiconscious, unknown, does not apply or incoherent"
+        tests:
+          - not_null
+
+      - name: bodily_injury
+        data_type: string
+        description: "Description of where the injury occured if it did "
+        tests:
+          - not_null
+
+      - name: position_in_vehicle
+        data_type: string
+        description: "Description of the person's position in the vehicle"
+        tests:
+          - not_null
+
+      - name: safety_equipment
+        data_type: string
+        description: "The safety equipment applied by the person"
+        tests:
+          - not_null
+
+      - name: ped_location
+        data_type: string
+        description: "The pedestrian location in the crash, if they were at intersection, not at intersection, unknown or does not apply"
+        tests:
+          - not_null
+
+      - name: ped_action
+        data_type: string
+        description: "Description of the pedestrian action prior to the crash"
+        tests:
+          - not_null
+
+      - name: complaint
+        data_type: string
+        description: "The health complaint of the person after the crash"
+        tests:
+          - not_null
+
+      - name: ped_role
+        data_type: string
+        description: "Description of the pedestrian role in the crash"
+        tests:
+          - not_null
+
+      - name: contributing_factor_1
+        data_type: string
+        description: "Person action that contributed to the crash"
+        tests:
+          - not_null
+
+      - name: contributing_factor_2
+        data_type: string
+        description: "Person action that contributed to the crash"
+        tests:
+          - not_null
