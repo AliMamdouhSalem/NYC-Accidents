@@ -1,0 +1,11 @@
+
+version: 2
+
+sources:
+  - name: staging
+    database: nyc-accidents-423921 
+    schema: raw
+    tables:
+      - name: crashes_raw
+      - name: person_raw
+      - name: vehicles_raw

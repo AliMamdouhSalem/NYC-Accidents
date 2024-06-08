@@ -1,0 +1,66 @@
+
+version: 2
+
+models:
+  - name: fct_crashes
+    description: "This the fact table for the NYC collisions data. It contains crashes data."
+    columns:
+      - name: collision_id
+        data_type: string
+        description: "Unique id for crash"
+        test:
+          - not_null
+          
+      - name: crash_time
+        data_type: time
+        description: "Time of crash"
+
+      - name: date_id
+        data_type: string
+        description: "A foreign key linking to the date dimension"
+        tests: 
+          - relationships:
+              to: ref('dim_date')
+              field: date_id
+
+      - name: location_id
+        data_type: string
+        description: "A foreign key linking to the location dimension"
+        tests:
+          - relationships:
+              to: ref('dim_location')
+              field: location_id
+              severity: warn
+
+      - name: borough_id
+        data_type: string
+        description: "A foreign key linking to a dimension contining NYC boroughs"
+        tests:
+          - relationships:
+              to: ref('dim_borough')
+              field: borough_id
+              severity: warn
+
+      - name: latitude
+        data_type: bignumeric
+        description: "Crash Latitude"
+        test:
+          - not_null
+
+      - name: longitude
+        data_type: bignumeric
+        description: "Crash Longitude"
+        test:
+          - not_null
+          
+      - name: number_of_injured
+        data_type: int64
+        description: "Number of people injured in the crash"
+        test:
+          - not_null
+
+      - name: number_of_killed
+        data_type: int64
+        description: "Number of people who died in the crash"
+        test:
+          - not_null
