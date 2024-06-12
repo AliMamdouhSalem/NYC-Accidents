@@ -18,5 +18,36 @@ This project uses three datasets from the [NYC Open Data](https://opendata.cityo
 #### Source ERD
 ![image](https://github.com/AliMamdouhSalem/NYC-Accidents/assets/74428524/e8d6b522-ec3c-4597-88fa-009f9ef0e029)
 
+## Data Exploration
+Data was explored in two ways. First of all, the data dicitionaries for all three datasets were read well then python was used to explore the data further and develop the extraction technique. I used jupyter notebook on my Github Codespace to the data exploration. 
+
+After researching the dictionary and the API documentation the following was found:
+- Only 1000 records can be retrieved at a time
+- The data is retrieved in json format
+- the offset attribute can be used to retrieve the data in increments of 1000s
+```'https://data.cityofnewyork.us/resource/h9gi-nx95.json?$offset=0' ``` Where the offset is the starting record number
+
+After succesfully retrieving the data the following was found:
+- Main attributes in the dictionary were not found in some records.
+- New attributes appeared in some records that sometimes were regular values or an array with different values
+- there were duplicates in the three tables
+
+The following decisions were taken based on this information:
+- Only attributes that are in the data dictionary will be considered
+- The data extraction and loading will be split into two. Initial loading for the first load of the dataset and incremental loading for daily updates.
+
+## Extract, Load, and Orchestrate
+The extraction, loading were done with python, orchestrated with Mage AI and hosted on Github Codespaces. To use Mage AI I followed the [quickstart guide](https://docs.mage.ai/getting-started/setup#docker-compose-template) on their website using the following way. 
+
+```
+git clone https://github.com/mage-ai/compose-quickstart.git mage-quickstart \
+&& cd mage-quickstart \
+&& cp dev.env .env && rm dev.env \
+&& docker compose up
+```
+
+As discussed in the last section two pipelines will be made for each dataset:
+### Initial loading
+This 
 
   
