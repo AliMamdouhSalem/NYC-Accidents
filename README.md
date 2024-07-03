@@ -1,6 +1,8 @@
 # NYC-Accidents
 This project is, hopefully, the first phase of analyzing the safety of New York City using different metrics. For this phase the NYC Motor collision datasets were used to analyze and assess the safety of New York City in regards to motor collisions by creating an end to end ELT incremental pipeline that refreshes daily to capture the most updated data.
 
+## Project Overview
+
 ## Questions
 This project aims to answer a number of question like: 
 - In which borough do the most accidents happen?
@@ -372,4 +374,420 @@ SELECT * FROM {{ df_1 }}
 ```
 ## Transforming and Modelling
 DBT was used to transform and model the data for analysis
-  
+
+### DBT DAG
+![image](https://github.com/AliMamdouhSalem/NYC-Accidents/assets/74428524/0a634e5d-997d-4ff9-b6c3-dc09644029be)
+
+### Macros
+
+#### handle_string_nulls
+```
+{% macro handle_string_nulls(field) -%}
+
+    case 
+        when {{field}} is null then 'NA'
+        else {{field}}
+    end
+
+{%- endmacro %}
+```
+#### convert_numerics
+```
+{% macro convert_numerics(number) -%}
+
+    case 
+        when {{number}} is null then 0
+        else cast({{number}} as integer) 
+    end
+
+{%- endmacro %}
+```
+#### handle_ages
+```
+{% macro handle_ages(age) -%}
+    case   
+        when cast({{age}} as integer)<0 then -1
+        when cast({{age}} as integer) is null then -1
+        when cast({{age}} as integer)>125 then -1
+        else cast({{age}} as integer)
+    end 
+{%- endmacro%}
+```
+### Staging
+
+#### stg_crashes_raw
+```
+XX{{
+    config(
+        materialized= 'incremental',
+        on_schema_change='fail'
+    )
+}}
+
+
+with 
+
+source as (
+
+    select * from {{ source('staging', 'crashes_raw') }}
+
+),
+
+renamed as (
+
+    select
+        distinct collision_id,
+        EXTRACT(DATE FROM crash_date) as crash_date,
+        crash_time,
+        {{handle_string_nulls('borough')}} as borough,
+        latitude,
+        longitude,
+        {{handle_string_nulls('on_street_name')}} as on_street_name,
+        {{handle_string_nulls('cross_street_name')}} as cross_street_name,
+        {{handle_string_nulls('off_street_name')}} as off_street_name,
+        number_of_persons_injured,
+        number_of_persons_killed,
+        number_of_pedestrians_injured,
+        number_of_pedestrians_killed,
+        number_of_cyclist_injured,
+        number_of_cyclist_killed,
+        number_of_motorist_injured,
+        number_of_motorist_killed,
+        contributing_factor_vehicle_1,
+        contributing_factor_vehicle_2,
+        contributing_factor_vehicle_3,
+        contributing_factor_vehicle_4,
+        contributing_factor_vehicle_5,
+        vehicle_type_code1,
+        vehicle_type_code2,
+        vehicle_type_code3,
+        vehicle_type_code4,
+        vehicle_type_code5
+
+    from source
+
+)
+
+select * from renamed order by crash_date
+
+```
+#### stg_vehicles_raw
+```
+{{
+    config(
+        materialized= 'incremental',
+        on_schema_change='fail'
+    )
+}}
+
+
+with 
+
+source as (
+
+    select * from {{ source('staging', 'vehicles_raw') }}
+
+),
+
+renamed as (
+
+    select
+        distinct unique_id,
+        collision_id,
+        crash_date,
+        crash_time,
+        vehicle_id,
+        state_registration,
+        vehicle_type,
+        vehicle_make,
+        vehicle_model,
+        vehicle_year,
+        travel_direction,
+        vehicle_occupants,
+        driver_sex,
+        driver_license_status,
+        driver_license_jurisdiction,
+        pre_crash,
+        point_of_impact,
+        vehicle_damage,
+        vehicle_damage_1,
+        vehicle_damage_2,
+        vehicle_damage_3,
+        public_property_damage,
+        public_property_damage_type,
+        contributing_factor_1,
+        contributing_factor_2
+
+    from source
+
+)
+
+select * from renamed
+
+```
+#### stg_person_raw
+```
+{{
+    config(
+        materialized= 'incremental',
+        on_schema_change='fail'
+    )
+}}
+
+
+
+with 
+
+source as (
+
+    select * from {{ source('staging', 'person_raw') }}
+
+),
+
+renamed as (
+
+    select
+        distinct unique_id,
+        collision_id,
+        crash_date,
+        crash_time,
+        person_id,
+        person_type,
+        person_injury,
+        vehicle_id,
+        person_age,
+        ejection,
+        emotional_status,
+        bodily_injury,
+        position_in_vehicle,
+        safety_equipment,
+        ped_location,
+        ped_action,
+        complaint,
+        ped_role,
+        contributing_factor_1,
+        contributing_factor_2,
+        person_sex
+
+    from source
+
+)
+
+select * from renamed 
+
+```
+
+### Fact
+
+#### fct_crashes
+
+```
+{{
+    config
+        (
+            materialized = 'incremental',
+            unique_id = 'collision_id',
+            on_schema_change = 'sync_all_columns'
+        )
+}}
+
+with 
+
+stg_crashes_raw as (
+
+    select * from {{ref("stg_crashes_raw")}}
+
+)
+
+select 
+
+    collision_id,
+    EXTRACT(TIME FROM PARSE_DATETIME('%H:%M', crash_time)) as crash_time,
+    {{dbt_utils.generate_surrogate_key(['crash_date'])}} as date_id,
+    {{dbt_utils.generate_surrogate_key(['on_street_name','cross_street_name','off_street_name'])}} as location_id,
+    {{dbt_utils.generate_surrogate_key(['borough'])}} as borough_id,
+    PARSE_BIGNUMERIC(latitude) as latitude,
+    PARSE_BIGNUMERIC(longitude) as longitude,
+    {{convert_numerics('number_of_persons_injured')}} as number_of_injured,
+    {{convert_numerics('number_of_persons_killed')}} as number_of_killed
+
+from 
+
+    stg_crashes_raw
+
+```
+
+### Dimensions
+
+#### dim_borough
+```
+with 
+stg_crashes_raw as
+(
+
+    select * from {{ref('stg_crashes_raw')}}
+
+)
+
+select 
+
+    DISTINCT {{dbt_utils.generate_surrogate_key(['borough'])}} as borough_id,
+    borough
+
+from 
+
+    stg_crashes_raw
+
+```
+#### dim_date
+```
+{{
+    config(
+        materialized = "table"
+    )
+}}
+with 
+    date_generated_data as (
+
+        {{ dbt_date.get_date_dimension("2012-07-01", "2050-12-31") }}
+
+    )
+
+select
+    {{dbt_utils.generate_surrogate_key(['date_day'])}} as date_id,
+    * 
+from 
+    date_generated_data
+
+```
+#### dim_location
+```
+{{
+    config(
+        materialized= 'incremental',
+        unique_id='location_id',
+        on_schema_change='sync_all_columns'
+    )
+}}
+
+with stg_crashes_raw as (
+
+    select * from {{ref('stg_crashes_raw')}}
+
+)
+
+select 
+   distinct {{dbt_utils.generate_surrogate_key(['on_street_name','cross_street_name','off_street_name'])}} as location_id,
+   on_street_name,
+   cross_street_name,
+   off_street_name
+from
+    stg_crashes_raw
+```
+#### dim_people
+```
+{{
+    config
+        (
+            materialized='incremental',
+            unique_id= 'unique_id',
+            on_schema_change= 'sync_all_columns'
+        )
+}}
+
+with
+
+stg_person_raw as
+(
+    select * from {{ref("stg_person_raw")}}
+)
+select 
+    unique_id,
+    collision_id,
+    person_id,
+    {{handle_string_nulls('vehicle_id')}} as vehicle_id,
+    {{handle_string_nulls('person_type')}} as person_type,
+    {{handle_string_nulls('person_injury')}} as person_injury,
+    {{handle_ages('person_age')}} as person_age,
+    {{handle_string_nulls('person_sex')}} as person_sex,
+    {{handle_string_nulls('ejection')}} as ejection,
+    {{handle_string_nulls('emotional_status')}} as emotional_status,
+    {{handle_string_nulls('bodily_injury')}} as bodily_injury,
+    {{handle_string_nulls('position_in_vehicle')}} as position_in_vehicle,
+    {{handle_string_nulls('safety_equipment')}} as safety_equipment,
+    {{handle_string_nulls('ped_location')}} as ped_location,
+    {{handle_string_nulls('ped_action')}} as ped_action,
+    {{handle_string_nulls('complaint')}} as complaint,
+    {{handle_string_nulls('ped_role')}} as  ped_role,
+    {{handle_string_nulls('contributing_factor_1')}} as contributing_factor_1,
+    {{handle_string_nulls('contributing_factor_2')}} as contributing_factor_2
+from 
+    stg_person_raw
+```
+#### dim_vehicles
+```
+{{
+    config
+        (
+            materialized = 'incremental',
+            unique_id = 'unique_id',
+            on_schema_change = 'sync_all_columns'
+        )
+}}
+
+with 
+
+stg_vehicles_raw as
+(
+
+        select * from {{ref('stg_vehicles_raw')}}
+
+)
+
+select 
+    unique_id,
+    collision_id,
+    vehicle_id,
+    {{handle_string_nulls('state_registration')}} as state_registration,
+    {{handle_string_nulls('vehicle_type')}} as vehicle_type,
+    {{handle_string_nulls('vehicle_make')}} as vehicle_make,
+    {{handle_string_nulls('vehicle_model')}} as vehicle_model,
+    case 
+        when {{convert_numerics('vehicle_year')}} > 2025 then 0
+        when {{convert_numerics('vehicle_year')}} < 1800 then 0
+        else {{convert_numerics('vehicle_year')}} 
+    end as vehicle_year,
+    case 
+        when upper({{handle_string_nulls('travel_direction')}}) = 'N' or upper({{handle_string_nulls('travel_direction')}}) = 'NORTH' then 'North'
+        when upper({{handle_string_nulls('travel_direction')}}) = 'S' or upper({{handle_string_nulls('travel_direction')}}) = 'SOUTH' then 'South'
+        when upper({{handle_string_nulls('travel_direction')}}) = 'E' or upper({{handle_string_nulls('travel_direction')}}) = 'EAST' then 'East'
+        when upper({{handle_string_nulls('travel_direction')}}) = 'W' or upper({{handle_string_nulls('travel_direction')}}) = 'WEST' then 'West'
+        when upper({{handle_string_nulls('travel_direction')}}) = 'NE' or upper({{handle_string_nulls('travel_direction')}}) = 'NORTHEAST' then 'North-East'
+        when upper({{handle_string_nulls('travel_direction')}}) = 'NW' or upper({{handle_string_nulls('travel_direction')}}) = 'NORTHWEST' then 'North-West'
+        when upper({{handle_string_nulls('travel_direction')}}) = 'SE' or upper({{handle_string_nulls('travel_direction')}}) = 'SOUTHEAST' then 'South-East'
+        when upper({{handle_string_nulls('travel_direction')}}) = 'SW' or upper({{handle_string_nulls('travel_direction')}}) = 'SOUTHWEST' then 'South-West'
+        else 'NA'
+    end as travel_direction,
+    {{convert_numerics('vehicle_occupants')}} as vehicle_occupants,
+    {{handle_string_nulls('driver_sex')}} as driver_sex,
+    {{handle_string_nulls('driver_license_status')}} as driver_license_status,
+    {{handle_string_nulls('driver_license_jurisdiction')}} as driver_license_jurisdiction,
+    {{handle_string_nulls('pre_crash')}} as pre_crash,
+    {{handle_string_nulls('point_of_impact')}} as point_of_impact,
+    {{handle_string_nulls('vehicle_damage')}} as vehicle_damage,
+    {{handle_string_nulls('vehicle_damage_1')}} as vehicle_damage_1,
+    {{handle_string_nulls('vehicle_damage_2')}} as vehicle_damage_2,
+    {{handle_string_nulls('vehicle_damage_3')}} as vehicle_damage_3,
+    case 
+        when public_property_damage_type is null then 'No public property damage'
+        else 'Public property damage'
+    end as is_public_property_damage, 
+    {{handle_string_nulls('public_property_damage_type')}} as public_property_damage_description,
+    {{handle_string_nulls('contributing_factor_1')}} as contributing_factor_1,
+    {{handle_string_nulls('contributing_factor_2')}} as contributing_factor_2
+
+from 
+    stg_vehicles_raw
+
+```
+## Analysis and reporting
