@@ -375,12 +375,17 @@ SELECT * FROM {{ df_1 }}
 ## Transforming and Modelling
 DBT was used to transform and model the data for analysis
 
+### Data Model
+![image](https://github.com/AliMamdouhSalem/NYC-Accidents/assets/74428524/b6ed93f9-3acc-477d-88ec-03ef30180805)
+
+
 ### DBT DAG
 ![image](https://github.com/AliMamdouhSalem/NYC-Accidents/assets/74428524/0a634e5d-997d-4ff9-b6c3-dc09644029be)
 
 ### Macros
-
+DBT Macros work in the same way as functions in any programming language 
 #### handle_string_nulls
+This macro is made to handle nulls as there were lots of null values in the data
 ```
 {% macro handle_string_nulls(field) -%}
 
@@ -392,6 +397,7 @@ DBT was used to transform and model the data for analysis
 {%- endmacro %}
 ```
 #### convert_numerics
+This macro handles null values for numerical fields
 ```
 {% macro convert_numerics(number) -%}
 
@@ -403,6 +409,7 @@ DBT was used to transform and model the data for analysis
 {%- endmacro %}
 ```
 #### handle_ages
+This macro handles wrong age values
 ```
 {% macro handle_ages(age) -%}
     case   
@@ -414,7 +421,7 @@ DBT was used to transform and model the data for analysis
 {%- endmacro%}
 ```
 ### Staging
-
+Those are the staging models. They are created with some preliminary cleaning steps before the other models are created.
 #### stg_crashes_raw
 ```
 XX{{
@@ -578,9 +585,8 @@ select * from renamed
 ```
 
 ### Fact
-
+That's our fact table. 3 surrogate keys were created using dbt.util's (a DBT library) generate_surrogate_key built-in macro which hashes columns. They were created as foreign keys for the borough, location, and date dimensions
 #### fct_crashes
-
 ```
 {{
     config
@@ -620,6 +626,7 @@ from
 ### Dimensions
 
 #### dim_borough
+This the dimension created for different NYC borough 
 ```
 with 
 stg_crashes_raw as
@@ -640,6 +647,7 @@ from
 
 ```
 #### dim_date
+This is our date dimension that was generated using one of DBT's libraries name dbt_date
 ```
 {{
     config(
@@ -661,6 +669,7 @@ from
 
 ```
 #### dim_location
+This is our location dimension which contains the street names where the accident took place
 ```
 {{
     config(
@@ -685,6 +694,7 @@ from
     stg_crashes_raw
 ```
 #### dim_people
+This is our people dimension which contains data about the people involved in a crash
 ```
 {{
     config
@@ -725,6 +735,7 @@ from
     stg_person_raw
 ```
 #### dim_vehicles
+This is our vehicles dimension which contains data about the vehicles involved in a crash
 ```
 {{
     config
@@ -790,4 +801,12 @@ from
     stg_vehicles_raw
 
 ```
+### Testing
+Different tests on the data were done using DBT built-in testing capabalities in addition to DBT Expectations which greatly increase the testing capabality of DBT:
+
+- Testing if values are not null
+- Testing the relationships between fact and dimensions
+- Testing if certain columns like borough name and travel direction have only their set of values with no wrong values
+  
 ## Analysis and reporting
+A dashboard was created using Power BI to visualise and gain valuable insights from the data.
