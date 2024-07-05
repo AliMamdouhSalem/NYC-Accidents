@@ -1,7 +1,18 @@
 # NYC-Accidents
-This project is, hopefully, the first phase of analyzing the safety of New York City using different metrics. For this phase the NYC Motor collision datasets were used to analyze and assess the safety of New York City in regards to motor collisions by creating an end to end ELT incremental pipeline that refreshes daily to capture the most updated data.
+
+This project is the first phase of analyzing the safety of New York City using different metrics. For this phase the NYC Motor collision datasets were used to analyze and assess the safety of New York City in regards to motor collisions by creating an end to end ELT incremental pipeline that refreshes daily to capture the most updated data.
 
 ## Project Overview
+![Project](https://github.com/AliMamdouhSalem/NYC-Accidents/assets/74428524/97ca180b-d5de-4711-9a9d-b3c1d3c19391)
+Several technologies were used to implement this project:
+
+- Python and SQL
+- Mage AI for orchestration
+- Terraform
+- Docker
+- Google BigQuery as our data warehouse
+- DBT for modelling and transformation
+- Power BI for analysis and visualisation
 
 ## Questions
 This project aims to answer a number of question like: 
@@ -38,6 +49,35 @@ After succesfully retrieving the data the following was found:
 The following decisions were taken based on this information:
 - Only attributes that are in the data dictionary will be considered
 - The data extraction and loading will be split into two. Initial loading for the first load of the dataset and incremental loading for daily updates.
+
+## Infrastructre as code
+Terraform was used to create the BigQuery Dataset
+
+```
+terraform {
+  required_providers {
+    google = {
+      source = "hashicorp/google"
+      version = "5.30.0"
+    }
+  }
+}
+
+provider "google" {
+    credentials = "Enter the path to your service account json"
+    project= "Enter your project id"
+    region= "Enter your projec's region"
+}
+
+
+resource "google_bigquery_dataset" "raw" {
+  dataset_id = "raw"
+  project    = "nyc-accidents-423921"
+  location   = "US"
+}
+
+```
+
 
 ## Extract, Load, and Orchestrate
 The extraction, loading were done with python, orchestrated with Mage AI, hosted on Github Codespaces and the data would be loaded into BigQuey. To use Mage AI I followed the [quickstart guide](https://docs.mage.ai/getting-started/setup#docker-compose-template) on their website using the following way.
@@ -695,6 +735,7 @@ from
 ```
 #### dim_people
 This is our people dimension which contains data about the people involved in a crash
+
 ```
 {{
     config
@@ -809,4 +850,46 @@ Different tests on the data were done using DBT built-in testing capabalities in
 - Testing if certain columns like borough name and travel direction have only their set of values with no wrong values
   
 ## Analysis and reporting
-A dashboard was created using Power BI to visualise and gain valuable insights from the data.
+A [dashboard](https://app.powerbi.com/view?r=eyJrIjoiZDcxZDVjZmMtNWViMS00OTkyLWE2ODItMDJmYzQ2NjZmNTk3IiwidCI6ImM2N2EyZTU0LTE2NGItNDVkYS1iNDdlLTEwZjkzZTU0M2ZmMyJ9) was created using Power BI to visualise and gain valuable insights from the data. 
+
+### Overview Dashboard
+This page has a top level view of the data 
+
+![Overview Dashboard](https://github.com/AliMamdouhSalem/NYC-Accidents/assets/74428524/f9fcf5bd-853a-4509-9d97-bec658a1178a)
+
+It contains the following Visualisations:
+
+- Three KPIs for total number of injured people, total number of deaths and accident
+- A line chart that can be toggled with a slicer between yearly accidents, yearly deaths and yearly injured
+- A pie chart and a shape map showing total accidents by borough
+- A table visualisations showing top 10 contributing factors
+- Two cards, one showing the top contributing factor and the other on shwowing the least contributing factor
+
+### Borough Dashboard
+This a drill-through page to drill by a certain borough and get valuable insights about it.
+
+![Borough dashboard](https://github.com/AliMamdouhSalem/NYC-Accidents/assets/74428524/359d5221-d389-4a06-b5f5-7a83bc3b8614)
+
+It contains the following Visualisations:
+
+- A card showing the borough's name
+- A line chart that can be toggled with a slicer between monthly accidents, monthly deaths and monthly injured
+- A map with accidents location and bubbles that get bigger per the number of accidents at this location
+- A bar chart showing the top 10 streets in this borough with the most number of accidents
+- Four Cards, one showing the most dangerous street and others showing this street's total accidents, total injured, and total deaths
+
+### Vehicle Dashboard
+This page shows insights about the vehicles involved in crashes.
+
+![Vehicle Dashboard](https://github.com/AliMamdouhSalem/NYC-Accidents/assets/74428524/92a40ba2-1e8a-43f3-8d0c-19cffb0f864a)
+
+It contains the following Visualisations:
+
+- A card for the total number of vehicles
+- A bar chart showing the sex of drivers per total vehicles involved in accidents
+- A bar char showing the number of licensed drivers, unlicensed drivers and drivers with a learner's permit per total vehicles involved in accidents
+- A line chart showing monthly number of vehicles involved in accidents
+- A bar chart showing the top 5 most dangerous points of impact
+- Two cards, one showing the most dangerous point of impact and the other showing the least dangerous one
+
+
